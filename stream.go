@@ -1,8 +1,11 @@
 package videoserver
 
 import (
+	"bufio"
+	"net/http"
 	"time"
 
+	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/format/rtspv2"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
@@ -93,4 +96,45 @@ func (app *Application) runStream(streamID uuid.UUID, url string, hlsEnabled boo
 			}
 		}
 	}
+}
+
+func (app *Application) runMJPEGStream(streamID uuid.UUID, url string, hlsEnabled bool) error {
+	timeStart := time.Now()
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	reader := bufio.NewReader(resp.Body)
+	var idx int8 = 0
+	for {
+		timeDecode := time.Now()
+		data := make([]byte, 100000)
+		n, err := reader.Read(data)
+		if err != nil {
+			return errors.Wrapf(err, "Can't read body data for stream id %s (%s)", streamID, url)
+		}
+		decode := time.Since(timeDecode)
+		newPcketAV := av.Packet{
+			IsKeyFrame:      true,
+			Idx:             idx,
+			CompositionTime: time.Since(timeStart) - decode,
+			Time:            decode,
+			Duration:        time.Since(timeStart),
+			Data:            data[:n],
+		}
+		err = app.cast(streamID, newPcketAV, hlsEnabled)
+		if err != nil {
+			errStatus := app.updateStreamStatus(streamID, false)
+			if errStatus != nil {
+				errors.Wrapf(errors.Wrapf(err, "Can't cast packet %s (%s)", streamID, url), "Can't switch status to False for stream '%s'", url)
+			}
+			return errors.Wrapf(err, "Can't cast packet %s (%s)", streamID, url)
+		}
+		idx++
+	}
+	return nil
 }

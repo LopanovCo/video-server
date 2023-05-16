@@ -13,7 +13,7 @@ type Configuration struct {
 	VideoServerCfg VideoConfiguration          `json:"video"`
 	HLSCfg         HLSConfiguration            `json:"hls"`
 	CorsConfig     CORSConfiguration           `json:"cors"`
-	RTSPStreams    []SingleStreamConfiguration `json:"rtsp_streams"`
+	Streams        []SingleStreamConfiguration `json:"streams"`
 }
 
 // APIConfiguration is needed for configuring REST API part

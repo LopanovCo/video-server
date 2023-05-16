@@ -81,14 +81,18 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 	if cfg.CorsConfig.Enabled {
 		tmp.setCors(cfg.CorsConfig)
 	}
-	for _, rtspStream := range cfg.RTSPStreams {
-		validUUID, err := uuid.Parse(rtspStream.GUID)
+	for _, stream := range cfg.Streams {
+		validUUID, err := uuid.Parse(stream.GUID)
 		if err != nil {
-			log.Printf("Not valid UUID: %s\n", rtspStream.GUID)
+			log.Printf("Not valid UUID: %s\n", stream.GUID)
 			continue
 		}
-		outputTypes := make([]StreamType, 0, len(rtspStream.OutputTypes))
-		for _, v := range rtspStream.OutputTypes {
+		streamType, ok := streamTypeExists(stream.Type)
+		if !ok {
+			return nil, errors.Wrapf(ErrStreamTypeNotExists, "Type: '%s'", stream.Type)
+		}
+		outputTypes := make([]StreamType, 0, len(stream.OutputTypes))
+		for _, v := range stream.OutputTypes {
 			typ, ok := streamTypeExists(v)
 			if !ok {
 				return nil, errors.Wrapf(ErrStreamTypeNotExists, "Type: '%s'", v)
@@ -98,9 +102,8 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 			}
 			outputTypes = append(outputTypes, typ)
 		}
-
-		tmp.Streams.Streams[validUUID] = NewStreamConfiguration(rtspStream.URL, outputTypes)
-		verbose := strings.ToLower(rtspStream.Verbose)
+		tmp.Streams.Streams[validUUID] = NewStreamConfiguration(stream.URL, streamType, outputTypes)
+		verbose := strings.ToLower(stream.Verbose)
 		if verbose == "v" {
 			tmp.Streams.Streams[validUUID].verbose = true
 		} else if verbose == "vvv" {

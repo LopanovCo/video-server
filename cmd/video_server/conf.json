@@ -24,12 +24,19 @@
         "expose_headers": ["Content-Length"],
         "allow_credentials":true
     },
-    "rtsp_streams": [
+    "streams": [
         {
             "guid": "a1b8e7cb-09e6-4f3a-b857-30c7b272a744",
             "type": "rtsp",
             "url": "rtsp://localhost:45666/live",
             "output_types": ["mse","hls"],
+            "verbose": "v"
+        },
+        {
+            "guid": "531d22c2-6696-4c86-8283-57cd099019a5",
+            "type": "mjpeg",
+            "url": "http://localhost:45777/stream",
+            "output_types": ["mse", "hls"],
             "verbose": "v"
         }
     ]

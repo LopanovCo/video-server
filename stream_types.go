@@ -9,6 +9,7 @@ const (
 	STREAM_TYPE_RTSP
 	STREAM_TYPE_HLS
 	STREAM_TYPE_MSE
+	STREAM_TYPE_MJPEG
 )
 
 func (iotaIdx StreamType) String() string {
@@ -17,16 +18,18 @@ func (iotaIdx StreamType) String() string {
 
 var (
 	supportedInputStreamTypes = map[StreamType]struct{}{
-		STREAM_TYPE_RTSP: {},
+		STREAM_TYPE_RTSP:  {},
+		STREAM_TYPE_MJPEG: {},
 	}
 	supportedOutputStreamTypes = map[StreamType]struct{}{
 		STREAM_TYPE_HLS: {},
 		STREAM_TYPE_MSE: {},
 	}
 	supportedStreamTypes = map[string]StreamType{
-		"rtsp": STREAM_TYPE_RTSP,
-		"hls":  STREAM_TYPE_HLS,
-		"mse":  STREAM_TYPE_MSE,
+		"rtsp":  STREAM_TYPE_RTSP,
+		"hls":   STREAM_TYPE_HLS,
+		"mse":   STREAM_TYPE_MSE,
+		"mjpeg": STREAM_TYPE_MJPEG,
 	}
 )
 

@@ -16,15 +16,17 @@ type StreamConfiguration struct {
 	mp4Chanel            chan av.Packet
 	verbose              bool
 	verboseDetailed      bool
+	Type                 StreamType
 }
 
 // NewStreamConfiguration returns default configuration
-func NewStreamConfiguration(streamURL string, supportedTypes []StreamType) *StreamConfiguration {
+func NewStreamConfiguration(streamURL string, streamType StreamType, supportedTypes []StreamType) *StreamConfiguration {
 	return &StreamConfiguration{
 		URL:                  streamURL,
 		Clients:              make(map[uuid.UUID]viewer),
 		hlsChanel:            make(chan av.Packet, 100),
 		mp4Chanel:            make(chan av.Packet, 100),
 		SupportedOutputTypes: supportedTypes,
+		Type:                 streamType,
 	}
 }
