@@ -16,6 +16,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.4 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
+	github.com/nsmith5/mjpeg v0.0.0-20200913181537-54b8ada0e53e // indirect
 	github.com/pelletier/go-toml/v2 v2.0.7 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/ugorji/go/codec v1.2.11 // indirect
