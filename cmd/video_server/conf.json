@@ -19,7 +19,15 @@
     },
     "archive": {
         "directory": "./mp4",
-        "ms_per_file": 30000
+        "ms_per_file": 30000,
+        "minio_settings": {
+            "host": "localhost",
+            "port": 9000,
+            "user": "dev"
+            "password": "dev"
+            "bucket": "archive_bucket",
+            "path": "/var/archive_data"
+        }
     },
     "cors": {
         "enabled": true,
@@ -49,7 +57,8 @@
             "archive": {
                 "enabled": true,
                 "directory": "./other_mp4_dir",
-                "ms_per_file": 10000
+                "ms_per_file": 10000,
+                "type": "fylesystem"
             }
         },
         {
@@ -60,7 +69,8 @@
             "verbose": "v",
             "archive": {
                 "enabled": true,
-                "ms_per_file": 15000
+                "ms_per_file": 15000,
+                "type": "minio"
             }
         }
     ]
