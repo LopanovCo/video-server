@@ -25,7 +25,7 @@
             "port": 9000,
             "user": "dev"
             "password": "dev"
-            "bucket": "archive_bucket",
+            "default_bucket": "archive_bucket",
             "path": "/var/archive_data"
         }
     },
@@ -70,7 +70,8 @@
             "archive": {
                 "enabled": true,
                 "ms_per_file": 15000,
-                "type": "minio"
+                "type": "minio",
+                "minio_bucket": "vod_bucket"
             }
         }
     ]
