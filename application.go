@@ -75,6 +75,13 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 	if cfg.CorsConfig.Enabled {
 		tmp.setCors(cfg.CorsConfig)
 	}
+	// mino
+	err := tmp.Streams.initMinio(cfg.ArchiveCfg.Minio)
+	if err != nil {
+		log.Error().Err(err).Str("scope", "minio").Str("minio", cfg.ArchiveCfg.Minio.String()).Msg("Not init minio")
+		return nil, err
+	}
+
 	for _, rtspStream := range cfg.RTSPStreams {
 		validUUID, err := uuid.Parse(rtspStream.GUID)
 		if err != nil {
@@ -96,7 +103,7 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 		tmp.Streams.Streams[validUUID] = NewStreamConfiguration(rtspStream.URL, outputTypes)
 		tmp.Streams.Streams[validUUID].verboseLevel = NewVerboseLevelFrom(rtspStream.Verbose)
 		if rtspStream.Archive.Enabled {
-			tmp.SetStreamArchive(validUUID, rtspStream.Archive.Directory, rtspStream.Archive.MsPerSegment)
+			tmp.SetStreamArchive(validUUID, rtspStream.Archive)
 		}
 	}
 	return &tmp, nil
@@ -174,8 +181,8 @@ func (app *Application) getStreamsIDs() []uuid.UUID {
 	return app.Streams.getKeys()
 }
 
-func (app *Application) SetStreamArchive(streamID uuid.UUID, dir string, msPerSegment int64) error {
-	return app.Streams.setArchiveStream(streamID, dir, msPerSegment)
+func (app *Application) SetStreamArchive(streamID uuid.UUID, streamArchiveConf configuration.StreamArchiveConfiguration) error {
+	return app.Streams.setArchiveStream(streamID, streamArchiveConf)
 }
 
 func (app *Application) getStreamArchive(streamID uuid.UUID) *streamArhive {

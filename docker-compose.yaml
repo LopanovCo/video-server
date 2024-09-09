@@ -1,0 +1,17 @@
+version: '3.7'
+
+services:
+ minio:
+   image: minio/minio:latest
+   command: server --console-address ":9001" /data/
+   ports:
+     - "9000:9000"
+     - "9001:9001"
+   environment:
+     # Access key length should be at least 3, and secret key length at least 8 characters
+     MINIO_ROOT_USER: dev_root
+     MINIO_ROOT_PASSWORD: dev_pass 
+   volumes:
+     - minio-storage:/data
+volumes:
+ minio-storage:

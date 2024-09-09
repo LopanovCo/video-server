@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -45,8 +46,23 @@ type HLSConfiguration struct {
 
 // ArchiveConfiguration is a archive configuration for every stream with enabled archive option
 type ArchiveConfiguration struct {
-	MsPerSegment int64  `json:"ms_per_file"`
-	Directory    string `json:"directory"`
+	MsPerSegment int64         `json:"ms_per_file"`
+	Directory    string        `json:"directory"`
+	Minio        MinioSettings `json:"minio_settings"`
+}
+
+// MinioSettings
+type MinioSettings struct {
+	Host          string `json:"host"`
+	Port          int32  `json:"port"`
+	User          string `json:"user"`
+	Password      string `json:"password"`
+	DefaultBucket string `json:"default_bucket"`
+	Path          string `json:"path"`
+}
+
+func (ms *MinioSettings) String() string {
+	return fmt.Sprintf("Host '%s' Port '%d' User '%s' Pass '%s' Bucket '%s' Path '%s'", ms.Host, ms.Port, ms.User, ms.Password, ms.DefaultBucket, ms.Path)
 }
 
 // CORSConfiguration is settings for CORS
@@ -75,6 +91,8 @@ type StreamArchiveConfiguration struct {
 	Enabled      bool   `json:"enabled"`
 	MsPerSegment int64  `json:"ms_per_file"`
 	Directory    string `json:"directory"`
+	TypeArchive  string `json:"type"`
+	MinioBucket  string `json:"minio_bucket"`
 }
 
 const (

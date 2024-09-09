@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/LdDl/video-server/configuration"
+	"github.com/LdDl/video-server/minio"
 	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/codec/aacparser"
 	"github.com/deepch/vdk/codec/h264parser"
@@ -19,6 +21,8 @@ const (
 type StreamsStorage struct {
 	sync.RWMutex
 	Streams map[uuid.UUID]*StreamConfiguration `json:"rtsp_streams"`
+
+	minioStorage minio.ImageStorage
 }
 
 // NewStreamsStorageDefault prepares new allocated storage
@@ -174,7 +178,27 @@ func (streams *StreamsStorage) cast(streamID uuid.UUID, pck av.Packet, hlsEnable
 	return nil
 }
 
-func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, dir string, msPerSegment int64) error {
+func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, streamArchiveConf configuration.StreamArchiveConfiguration) error {
+
+	switch streamArchiveConf.TypeArchive {
+	case "fylesystem":
+		err := streams.setArchiveStreamFS(streamID, streamArchiveConf.Directory, streamArchiveConf.MsPerSegment)
+		if err != nil {
+			return err
+		}
+	case "minio":
+		err := streams.setArchiveStreamMinio(streamID, streamArchiveConf.MinioBucket, streamArchiveConf.MsPerSegment)
+		if err != nil {
+			return err
+		}
+	default:
+		return ErrNotSupportedStorage
+	}
+
+	return nil
+}
+
+func (streams *StreamsStorage) setArchiveStreamFS(streamID uuid.UUID, dir string, msPerSegment int64) error {
 	if dir == "" {
 		return fmt.Errorf("bad directory archive stream")
 	}
@@ -182,6 +206,7 @@ func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, dir string, 
 		return fmt.Errorf("bad ms per segment archive stream")
 	}
 	newArhive := streamArhive{
+		typeArchive:  "fylesystem",
 		dir:          dir,
 		msPerSegment: msPerSegment,
 	}
@@ -193,7 +218,34 @@ func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, dir string, 
 	}
 	stream.archive = &newArhive
 	if stream.verboseLevel > VERBOSE_NONE {
-		log.Info().Str("scope", SCOPE_STREAM).Str("event", "set_archive").Str("stream_id", streamID.String()).Str("dir", dir).Int64("ms_per_segment", msPerSegment).Msg("Add archive")
+		log.Info().Str("scope", SCOPE_STREAM).Str("event", "set_archive").Str("stream_id", streamID.String()).Str("dir", dir).Int64("ms_per_segment", msPerSegment).Msg("Add fylesystem archive")
+	}
+	return nil
+}
+
+func (streams *StreamsStorage) setArchiveStreamMinio(streamID uuid.UUID, bucket string, msPerSegment int64) error {
+	if msPerSegment == 0 {
+		return fmt.Errorf("bad ms per segment archive stream")
+	}
+	err := streams.minioStorage.MakeBucket(bucket)
+	if err != nil {
+		return ErrMakeBucket
+	}
+
+	newArhive := streamArhive{
+		typeArchive:  "minio",
+		bucket:       bucket,
+		msPerSegment: msPerSegment,
+	}
+	streams.Lock()
+	defer streams.Unlock()
+	stream, ok := streams.Streams[streamID]
+	if !ok {
+		return ErrStreamNotFound
+	}
+	stream.archive = &newArhive
+	if stream.verboseLevel > VERBOSE_NONE {
+		log.Info().Str("scope", SCOPE_STREAM).Str("event", "set_archive").Str("stream_id", streamID.String()).Str("bucket", bucket).Int64("ms_per_segment", msPerSegment).Msg("Add minio archive")
 	}
 	return nil
 }
@@ -206,4 +258,27 @@ func (streams *StreamsStorage) getArchiveStream(streamID uuid.UUID) *streamArhiv
 		return nil
 	}
 	return stream.archive
+}
+
+func (streams *StreamsStorage) initMinio(minioSettings configuration.MinioSettings) error {
+	minioStorage, err := minio.NewMinioProvider(
+		fmt.Sprintf("%s:%d", minioSettings.Host, minioSettings.Port),
+		minioSettings.User,
+		minioSettings.Password,
+		false,
+		minioSettings.DefaultBucket,
+		minioSettings.Path,
+	)
+	if err != nil {
+		log.Error().Str("scope", "minio").Err(err).Msg("Can't init minio_storage")
+		return err
+	}
+	err = minioStorage.Connect()
+	if err != nil {
+		log.Error().Str("scope", "minio").Err(err).Msg("Can't connect minio")
+		return err
+	}
+	streams.minioStorage = minioStorage
+	log.Info().Str("scope", "storage").Msg("Runing minio image storage")
+	return nil
 }
