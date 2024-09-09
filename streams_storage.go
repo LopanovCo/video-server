@@ -206,7 +206,7 @@ func (streams *StreamsStorage) setArchiveStreamFS(streamID uuid.UUID, dir string
 		return fmt.Errorf("bad ms per segment archive stream")
 	}
 	newArhive := streamArhive{
-		typeArchive:  "fylesystem",
+		typeArchive:  storage.STORAGE_FILESYSTEM,
 		dir:          dir,
 		msPerSegment: msPerSegment,
 	}
@@ -233,7 +233,7 @@ func (streams *StreamsStorage) setArchiveStreamMinio(streamID uuid.UUID, dir str
 	}
 
 	newArhive := streamArhive{
-		typeArchive:  "minio",
+		typeArchive:  storage.STORAGE_MINIO,
 		dir:          dir,
 		bucket:       bucket,
 		msPerSegment: msPerSegment,

@@ -123,7 +123,7 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			// @todo: handle?
 		}
 
-		if archive.typeArchive == "minio" {
+		if archive.typeArchive == storage.STORAGE_MINIO {
 			_, err = outFile.Seek(0, io.SeekStart)
 			if err != nil {
 				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't seek to the start of file")
