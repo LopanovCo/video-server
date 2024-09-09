@@ -179,9 +179,8 @@ func (streams *StreamsStorage) cast(streamID uuid.UUID, pck av.Packet, hlsEnable
 }
 
 func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, streamArchiveConf configuration.StreamArchiveConfiguration) error {
-
 	switch streamArchiveConf.TypeArchive {
-	case "fylesystem":
+	case "filesystem":
 		err := streams.setArchiveStreamFS(streamID, streamArchiveConf.Directory, streamArchiveConf.MsPerSegment)
 		if err != nil {
 			return err
@@ -192,6 +191,7 @@ func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, streamArchiv
 			return err
 		}
 	default:
+
 		return ErrNotSupportedStorage
 	}
 
