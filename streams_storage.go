@@ -22,7 +22,7 @@ type StreamsStorage struct {
 	sync.RWMutex
 	Streams map[uuid.UUID]*StreamConfiguration `json:"rtsp_streams"`
 
-	minioStorage storage.ImageStorage
+	minioStorage storage.ArchiveStorage
 }
 
 // NewStreamsStorageDefault prepares new allocated storage

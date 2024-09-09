@@ -27,7 +27,7 @@ type minioAuthData struct {
 	ssl bool
 }
 
-func NewMinioProvider(minioURL string, minioUser string, minioPassword string, ssl bool, bucket, path string) (ImageStorage, error) {
+func NewMinioProvider(minioURL string, minioUser string, minioPassword string, ssl bool, bucket, path string) (ArchiveStorage, error) {
 	return &MinioProvider{
 		DefaultBucket: bucket,
 		Path:          path,
@@ -100,7 +100,7 @@ func (m *MinioProvider) MakeBucket(bucket string) error {
 	return nil
 }
 
-func (m *MinioProvider) UploadFile(ctx context.Context, object ImageUnit) (string, error) {
+func (m *MinioProvider) UploadFile(ctx context.Context, object ArchiveUnit) (string, error) {
 	fname := fmt.Sprintf("%s/%s", m.Path, object.SegmentName)
 	imageReader := bytes.NewReader(object.Payload)
 	imageReaderSize := bytes.NewReader(object.Payload)
@@ -122,7 +122,7 @@ func (m *MinioProvider) UploadFile(ctx context.Context, object ImageUnit) (strin
 	return object.SegmentName, err
 }
 
-func (m *MinioProvider) DownloadFile(ctx context.Context, object ImageUnit) ([]byte, error) {
+func (m *MinioProvider) DownloadFile(ctx context.Context, object ArchiveUnit) ([]byte, error) {
 	fname := fmt.Sprintf("%s/%s", m.Path, object.SegmentName)
 	bucket := m.DefaultBucket
 	if object.Bucket != "" {
@@ -145,7 +145,7 @@ func (m *MinioProvider) DownloadFile(ctx context.Context, object ImageUnit) ([]b
 	return imgBytes, nil
 }
 
-func (m *MinioProvider) RemoveFile(ctx context.Context, object ImageUnit) (string, error) {
+func (m *MinioProvider) RemoveFile(ctx context.Context, object ArchiveUnit) (string, error) {
 	fname := fmt.Sprintf("%s/%s", m.Path, object.SegmentName)
 	bucket := m.DefaultBucket
 	if object.Bucket != "" {
