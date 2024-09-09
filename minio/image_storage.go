@@ -2,11 +2,10 @@ package minio
 
 import (
 	"context"
-	"io"
 )
 
 type ImageUnit struct {
-	Payload     io.Reader
+	Payload     []byte
 	Bucket      string
 	SegmentName string
 }

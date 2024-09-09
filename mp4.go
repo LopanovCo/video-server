@@ -121,10 +121,22 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_write_trail").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't write trailing data for TS muxer")
 			// @todo: handle?
 		}
+		if err := outFile.Close(); err != nil {
+			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_close").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't close file")
+			// @todo: handle?
+		}
+
+		lastSegmentTime = lastSegmentTime.Add(time.Since(st))
+		log.Info().Str("scope", "archive").Str("event", "archive_close_file").Str("stream_id", streamID.String()).Str("segment_path", segmentPath).Msg("Close segment")
 
 		if archive.typeArchive == "minio" {
+			bytes, err := os.ReadFile(segmentPath)
+			if err != nil {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't read segment")
+				return err
+			}
 			obj := minio.ImageUnit{
-				Payload:     outFile,
+				Payload:     bytes,
 				SegmentName: segmentName,
 				Bucket:      archive.bucket,
 			}
@@ -138,14 +150,14 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			if segmentName != outSegmentName {
 				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't save segment")
 			}
+
+			err = os.Remove(segmentPath)
+			if err != nil {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't remove segment")
+				return err
+			}
 		}
 
-		if err := outFile.Close(); err != nil {
-			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_close").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't close file")
-			// @todo: handle?
-		}
-		lastSegmentTime = lastSegmentTime.Add(time.Since(st))
-		log.Info().Str("scope", "archive").Str("event", "archive_close_file").Str("stream_id", streamID.String()).Str("segment_path", segmentPath).Msg("Close segment")
 	}
 	return nil
 }
