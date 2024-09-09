@@ -23,8 +23,8 @@
         "minio_settings": {
             "host": "localhost",
             "port": 9000,
-            "user": "dev"
-            "password": "dev"
+            "user": "dev",
+            "password": "dev",
             "default_bucket": "archive_bucket",
             "path": "/var/archive_data"
         }
