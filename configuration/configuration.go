@@ -58,11 +58,11 @@ type MinioSettings struct {
 	User          string `json:"user"`
 	Password      string `json:"password"`
 	DefaultBucket string `json:"default_bucket"`
-	Path          string `json:"path"`
+	DefaultPath   string `json:"default_path"`
 }
 
 func (ms *MinioSettings) String() string {
-	return fmt.Sprintf("Host '%s' Port '%d' User '%s' Pass '%s' Bucket '%s' Path '%s'", ms.Host, ms.Port, ms.User, ms.Password, ms.DefaultBucket, ms.Path)
+	return fmt.Sprintf("Host '%s' Port '%d' User '%s' Pass '%s' Bucket '%s' Path '%s'", ms.Host, ms.Port, ms.User, ms.Password, ms.DefaultBucket, ms.DefaultPath)
 }
 
 // CORSConfiguration is settings for CORS
@@ -93,6 +93,7 @@ type StreamArchiveConfiguration struct {
 	Directory    string `json:"directory"`
 	TypeArchive  string `json:"type"`
 	MinioBucket  string `json:"minio_bucket"`
+	MinioPath    string `json:"minio_path"`
 }
 
 const (
@@ -134,14 +135,9 @@ func PrepareConfiguration(fname string) (*Configuration, error) {
 		if !archiveCfg.Enabled {
 			continue
 		}
-		if archiveCfg.Directory == "" {
-			if cfg.ArchiveCfg.Directory != "" {
-				cfg.RTSPStreams[i].Archive.Directory = cfg.ArchiveCfg.Directory
-			} else {
-				cfg.RTSPStreams[i].Archive.Directory = "./mp4"
-			}
-		}
-		if archiveCfg.MsPerSegment == 0 {
+
+		// Default common settings for archive
+		if archiveCfg.MsPerSegment <= 0 {
 			if cfg.ArchiveCfg.MsPerSegment > 0 {
 				cfg.RTSPStreams[i].Archive.MsPerSegment = cfg.ArchiveCfg.MsPerSegment
 			} else {
@@ -149,6 +145,22 @@ func PrepareConfiguration(fname string) (*Configuration, error) {
 			}
 		}
 
+		// Default filesystem settigs
+		if archiveCfg.Directory == "" {
+			if cfg.ArchiveCfg.Directory != "" {
+				cfg.RTSPStreams[i].Archive.Directory = cfg.ArchiveCfg.Directory
+			} else {
+				cfg.RTSPStreams[i].Archive.Directory = "./mp4"
+			}
+		}
+
+		// Default minio settings
+		if archiveCfg.MinioBucket == "" {
+			cfg.RTSPStreams[i].Archive.MinioBucket = cfg.ArchiveCfg.Minio.DefaultBucket
+		}
+		if archiveCfg.MinioPath == "" {
+			cfg.RTSPStreams[i].Archive.MinioPath = cfg.ArchiveCfg.Minio.DefaultBucket
+		}
 	}
 	return cfg, nil
 }

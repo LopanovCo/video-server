@@ -22,10 +22,6 @@ func (storage *FileSystemProvider) Type() StorageType {
 	return STORAGE_FILESYSTEM
 }
 
-func (storage *FileSystemProvider) Connect() error {
-	return nil
-}
-
 func (storage *FileSystemProvider) MakeBucket(bucket string) error {
 	return os.MkdirAll(bucket, os.ModePerm)
 }

@@ -7,75 +7,26 @@ import (
 	"io"
 
 	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/minio/minio-go/v7/pkg/lifecycle"
 )
 
 type MinioProvider struct {
-	minioAuthData
 	client *minio.Client
 
 	DefaultBucket string
 	Path          string
 }
 
-type minioAuthData struct {
-	url      string
-	user     string
-	password string
-	// token    string
-	ssl bool
-}
-
-func NewMinioProvider(minioURL string, minioUser string, minioPassword string, ssl bool, bucket, path string) (ArchiveStorage, error) {
+func NewMinioProvider(client *minio.Client, bucket, path string) (ArchiveStorage, error) {
 	return &MinioProvider{
+		client:        client,
 		DefaultBucket: bucket,
 		Path:          path,
-		minioAuthData: minioAuthData{
-			password: minioPassword,
-			url:      minioURL,
-			user:     minioUser,
-			ssl:      ssl,
-		},
 	}, nil
 }
 
 func (m *MinioProvider) Type() StorageType {
 	return STORAGE_MINIO
-}
-
-func (m *MinioProvider) Connect() error {
-	var err error
-	m.client, err = minio.New(m.url, &minio.Options{
-		Creds:  credentials.NewStaticV4(m.user, m.password, ""),
-		Secure: m.ssl,
-	})
-	if err != nil {
-		return err
-	}
-
-	_ = m.client.MakeBucket(context.Background(),
-		m.DefaultBucket,
-		minio.MakeBucketOptions{
-			ObjectLocking: true,
-		})
-
-	config := lifecycle.NewConfiguration()
-	config.Rules = []lifecycle.Rule{
-		{
-			ID:     "expire-bucket",
-			Status: "Enabled",
-			Expiration: lifecycle.Expiration{
-				Days: 2,
-			},
-		},
-	}
-
-	err = m.client.SetBucketLifecycle(context.Background(), m.DefaultBucket, config)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return nil
 }
 
 func (m *MinioProvider) MakeBucket(bucket string) error {
@@ -84,7 +35,6 @@ func (m *MinioProvider) MakeBucket(bucket string) error {
 		minio.MakeBucketOptions{
 			ObjectLocking: true,
 		})
-
 	config := lifecycle.NewConfiguration()
 	config.Rules = []lifecycle.Rule{
 		{
@@ -113,7 +63,7 @@ func (m *MinioProvider) UploadFile(ctx context.Context, object ArchiveUnit) (str
 	if object.Bucket != "" {
 		bucket = object.Bucket
 	}
-	nn, err := m.client.PutObject(
+	_, err = m.client.PutObject(
 		ctx,
 		bucket,
 		fname,
@@ -123,7 +73,6 @@ func (m *MinioProvider) UploadFile(ctx context.Context, object ArchiveUnit) (str
 			ContentType: "application/octet-stream",
 		},
 	)
-	fmt.Println("minio bucket data written", nn.Size)
 	return object.SegmentName, err
 }
 

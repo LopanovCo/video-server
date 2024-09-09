@@ -20,9 +20,11 @@ type StreamConfiguration struct {
 }
 
 type streamArhive struct {
+	store        storage.ArchiveStorage
 	typeArchive  storage.StorageType
 	dir          string
 	bucket       string
+	bucketPath   string
 	msPerSegment int64
 }
 

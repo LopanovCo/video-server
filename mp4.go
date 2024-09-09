@@ -22,6 +22,10 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 	if archive == nil {
 		return errors.Wrap(err, "Bad archive stream")
 	}
+	err = archive.store.MakeBucket(archive.bucket)
+	if err != nil {
+		return errors.Wrap(err, "Can't prepare bucket")
+	}
 
 	err = ensureDir(archive.dir)
 	if err != nil {
@@ -134,7 +138,7 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 				SegmentName: segmentName,
 				Bucket:      archive.bucket,
 			}
-			outSegmentName, err := app.Streams.minioStorage.UploadFile(context.Background(), obj)
+			outSegmentName, err := archive.store.UploadFile(context.Background(), obj)
 			if err != nil {
 				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't save segment")
 				return err
