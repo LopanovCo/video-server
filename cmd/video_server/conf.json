@@ -13,7 +13,7 @@
     },
     "hls": {
         "ms_per_segment": 10000,
-        "directory": "./hls",
+        "directory": "G:\\Go\\src\\video-server\\cmd\\video_server\\hls",
         "window_size": 5,
         "window_capacity" : 10
     },
