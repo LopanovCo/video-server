@@ -15,10 +15,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const (
-	segmentMP4layout = time.RFC3339
-)
-
 func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast chan bool) error {
 	var err error
 	archive := app.getStreamArchive(streamID)
@@ -40,7 +36,7 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 	for isConnected {
 		// Create new segment file
 		st := time.Now()
-		segmentName := fmt.Sprintf("%s_%s.mp4", streamID, lastSegmentTime.Format(segmentMP4layout))
+		segmentName := fmt.Sprintf("%s_%d.mp4", streamID, lastSegmentTime.Unix())
 		segmentPath := filepath.Join(archive.dir, segmentName)
 		outFile, err := os.Create(segmentPath)
 		if err != nil {
@@ -67,7 +63,6 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 				break
 			}
 		}
-
 		segmentLength := time.Duration(0)
 		packetLength := time.Duration(0)
 		segmentCount := 0
@@ -85,7 +80,6 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			segmentLength += packetLength
 			segmentCount++
 		}
-
 		// @todo Oh, I don't like GOTOs, but it is what it is.
 	segmentLoop:
 		for {
@@ -123,13 +117,10 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 				}
 			}
 		}
-
 		if err := tsMuxer.WriteTrailer(); err != nil {
 			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_write_trail").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't write trailing data for TS muxer")
 			// @todo: handle?
 		}
-
-		// reader := bufio.NewReader(outFile)
 
 		obj := minio.ImageUnit{
 			Payload:     outFile,
