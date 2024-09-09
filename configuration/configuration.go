@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -58,6 +59,10 @@ type MinioSettings struct {
 	Password      string `json:"password"`
 	DefaultBucket string `json:"default_bucket"`
 	Path          string `json:"path"`
+}
+
+func (ms *MinioSettings) String() string {
+	return fmt.Sprintf("Host '%s' Port '%d' User '%s' Pass '%s' Bucket '%s' Path '%s'", ms.Host, ms.Port, ms.User, ms.Password, ms.DefaultBucket, ms.Path)
 }
 
 // CORSConfiguration is settings for CORS

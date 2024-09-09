@@ -18,7 +18,9 @@ type StreamConfiguration struct {
 	archive              *streamArhive
 }
 type streamArhive struct {
+	typeArchive  string
 	dir          string
+	bucket       string
 	msPerSegment int64
 }
 

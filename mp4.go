@@ -1,11 +1,13 @@
 package videoserver
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/LdDl/video-server/minio"
 	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/format/mp4"
 	"github.com/google/uuid"
@@ -124,6 +126,24 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 		if err := tsMuxer.WriteTrailer(); err != nil {
 			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_write_trail").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't write trailing data for TS muxer")
 			// @todo: handle?
+		}
+
+		// reader := bufio.NewReader(outFile)
+
+		obj := minio.ImageUnit{
+			Payload:     outFile,
+			SegmentName: segmentName,
+			Bucket:      archive.bucket,
+		}
+
+		outSegmentName, err := app.Streams.minioStorage.UploadFile(context.Background(), obj)
+		if err != nil {
+			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't save segment")
+			return err
+		}
+
+		if segmentName != outSegmentName {
+			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't save segment")
 		}
 
 		if err := outFile.Close(); err != nil {
