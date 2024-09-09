@@ -5,7 +5,7 @@ import (
 	"sync"
 
 	"github.com/LdDl/video-server/configuration"
-	"github.com/LdDl/video-server/minio"
+	"github.com/LdDl/video-server/storage"
 	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/codec/aacparser"
 	"github.com/deepch/vdk/codec/h264parser"
@@ -22,7 +22,7 @@ type StreamsStorage struct {
 	sync.RWMutex
 	Streams map[uuid.UUID]*StreamConfiguration `json:"rtsp_streams"`
 
-	minioStorage minio.ImageStorage
+	minioStorage storage.ImageStorage
 }
 
 // NewStreamsStorageDefault prepares new allocated storage
@@ -262,7 +262,7 @@ func (streams *StreamsStorage) getArchiveStream(streamID uuid.UUID) *streamArhiv
 }
 
 func (streams *StreamsStorage) initMinio(minioSettings configuration.MinioSettings) error {
-	minioStorage, err := minio.NewMinioProvider(
+	minioStorage, err := storage.NewMinioProvider(
 		fmt.Sprintf("%s:%d", minioSettings.Host, minioSettings.Port),
 		minioSettings.User,
 		minioSettings.Password,

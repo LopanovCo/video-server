@@ -1,4 +1,4 @@
-package minio
+package storage
 
 import (
 	"bytes"
@@ -36,7 +36,8 @@ func NewMinioProvider(minioURL string, minioUser string, minioPassword string, s
 			url:      minioURL,
 			user:     minioUser,
 			ssl:      ssl,
-		}}, nil
+		},
+	}, nil
 }
 
 func (m *MinioProvider) Type() string {

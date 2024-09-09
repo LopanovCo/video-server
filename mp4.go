@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/LdDl/video-server/minio"
+	"github.com/LdDl/video-server/storage"
 	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/format/mp4"
 	"github.com/google/uuid"
@@ -135,7 +135,7 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't read segment")
 				return err
 			}
-			obj := minio.ImageUnit{
+			obj := storage.ImageUnit{
 				Payload:     bytes,
 				SegmentName: segmentName,
 				Bucket:      archive.bucket,
