@@ -102,19 +102,23 @@ func (m *MinioProvider) MakeBucket(bucket string) error {
 
 func (m *MinioProvider) UploadFile(ctx context.Context, object ArchiveUnit) (string, error) {
 	fname := fmt.Sprintf("%s/%s", m.Path, object.SegmentName)
-	imageReader := bytes.NewReader(object.Payload)
-	imageReaderSize := bytes.NewReader(object.Payload)
+
+	buf := &bytes.Buffer{}
+	size, err := io.Copy(buf, object.Payload)
+	if err != nil {
+		return "", err
+	}
 
 	bucket := m.DefaultBucket
 	if object.Bucket != "" {
 		bucket = object.Bucket
 	}
-	_, err := m.client.PutObject(
+	_, err = m.client.PutObject(
 		ctx,
 		bucket,
 		fname,
-		imageReader,
-		imageReaderSize.Size(),
+		object.Payload,
+		size,
 		minio.PutObjectOptions{
 			ContentType: "application/octet-stream",
 		},

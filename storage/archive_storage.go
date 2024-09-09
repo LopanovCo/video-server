@@ -2,10 +2,11 @@ package storage
 
 import (
 	"context"
+	"io"
 )
 
 type ArchiveUnit struct {
-	Payload     []byte
+	Payload     io.Reader
 	Bucket      string
 	SegmentName string
 }
