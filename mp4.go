@@ -45,6 +45,7 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			return errors.Wrap(err, fmt.Sprintf("Can't create mp4-segment for stream %s", streamID))
 		}
 		tsMuxer := mp4.NewMuxer(outFile)
+		log.Info().Str("scope", "archive").Str("event", "archive_create_file").Str("stream_id", streamID.String()).Str("segment_path", segmentPath).Msg("Create segment")
 
 		// Write header
 		codecData, err := app.getCodec(streamID)
@@ -131,6 +132,7 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			// @todo: handle?
 		}
 		lastSegmentTime = lastSegmentTime.Add(time.Since(st))
+		log.Info().Str("scope", "archive").Str("event", "archive_close_file").Str("stream_id", streamID.String()).Str("segment_path", segmentPath).Msg("Close segment")
 	}
 	return nil
 }
