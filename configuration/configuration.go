@@ -159,7 +159,7 @@ func PrepareConfiguration(fname string) (*Configuration, error) {
 			cfg.RTSPStreams[i].Archive.MinioBucket = cfg.ArchiveCfg.Minio.DefaultBucket
 		}
 		if archiveCfg.MinioPath == "" {
-			cfg.RTSPStreams[i].Archive.MinioPath = cfg.ArchiveCfg.Minio.DefaultBucket
+			cfg.RTSPStreams[i].Archive.MinioPath = cfg.ArchiveCfg.Minio.DefaultPath
 		}
 	}
 	return cfg, nil

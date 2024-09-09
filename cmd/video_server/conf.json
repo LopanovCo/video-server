@@ -26,7 +26,7 @@
             "user": "dev_root",
             "password": "dev_pass",
             "default_bucket": "archive-bucket",
-            "path": "/var/archive_data"
+            "default_path": "/var/archive_data"
         }
     },
     "cors": {
@@ -62,7 +62,8 @@
                 "ms_per_file": 15000,
                 "type": "minio",
                 "directory": "G:\\Go\\src\\video-server\\cmd\\video_server\\mp4",
-                "minio_bucket": "vod-bucket"
+                "minio_bucket": "vod-bucket",
+                "minio_path": "/var/archive_data_custom"
             }
         }
     ]
