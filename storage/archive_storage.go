@@ -11,7 +11,7 @@ type ArchiveUnit struct {
 }
 
 type ArchiveStorage interface {
-	Type() string
+	Type() StorageType
 	Connect() error
 	MakeBucket(string) error
 	UploadFile(context.Context, ArchiveUnit) (string, error)

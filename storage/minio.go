@@ -40,8 +40,8 @@ func NewMinioProvider(minioURL string, minioUser string, minioPassword string, s
 	}, nil
 }
 
-func (m *MinioProvider) Type() string {
-	return "minio"
+func (m *MinioProvider) Type() StorageType {
+	return STORAGE_MINIO
 }
 
 func (m *MinioProvider) Connect() error {

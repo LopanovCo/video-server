@@ -1,9 +1,8 @@
 package videoserver
 
 import (
-	"strings"
-
 	"github.com/LdDl/video-server/configuration"
+	"github.com/LdDl/video-server/storage"
 	"github.com/gin-contrib/cors"
 	"github.com/pkg/errors"
 
@@ -100,7 +99,8 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 		tmp.Streams.Streams[validUUID] = NewStreamConfiguration(rtspStream.URL, outputTypes)
 		tmp.Streams.Streams[validUUID].verboseLevel = NewVerboseLevelFrom(rtspStream.Verbose)
 		if rtspStream.Archive.Enabled {
-			if !minioEnabled && strings.ToLower(rtspStream.Archive.TypeArchive) == "minio" {
+			storageType := storage.NewStorageTypeFrom(rtspStream.Archive.TypeArchive)
+			if !minioEnabled && storageType == storage.STORAGE_MINIO {
 				err := tmp.Streams.initMinio(cfg.ArchiveCfg.Minio)
 				if err != nil {
 					log.Error().Err(err).Str("scope", "minio").Str("minio", cfg.ArchiveCfg.Minio.String()).Msg("Not init minio")
