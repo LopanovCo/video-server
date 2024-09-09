@@ -122,20 +122,22 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			// @todo: handle?
 		}
 
-		obj := minio.ImageUnit{
-			Payload:     outFile,
-			SegmentName: segmentName,
-			Bucket:      archive.bucket,
-		}
+		if archive.typeArchive == "minio" {
+			obj := minio.ImageUnit{
+				Payload:     outFile,
+				SegmentName: segmentName,
+				Bucket:      archive.bucket,
+			}
 
-		outSegmentName, err := app.Streams.minioStorage.UploadFile(context.Background(), obj)
-		if err != nil {
-			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't save segment")
-			return err
-		}
+			outSegmentName, err := app.Streams.minioStorage.UploadFile(context.Background(), obj)
+			if err != nil {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't save segment")
+				return err
+			}
 
-		if segmentName != outSegmentName {
-			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't save segment")
+			if segmentName != outSegmentName {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't save segment")
+			}
 		}
 
 		if err := outFile.Close(); err != nil {

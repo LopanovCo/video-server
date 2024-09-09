@@ -186,7 +186,7 @@ func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, streamArchiv
 			return err
 		}
 	case "minio":
-		err := streams.setArchiveStreamMinio(streamID, streamArchiveConf.MinioBucket, streamArchiveConf.MsPerSegment)
+		err := streams.setArchiveStreamMinio(streamID, streamArchiveConf.Directory, streamArchiveConf.MinioBucket, streamArchiveConf.MsPerSegment)
 		if err != nil {
 			return err
 		}
@@ -223,7 +223,7 @@ func (streams *StreamsStorage) setArchiveStreamFS(streamID uuid.UUID, dir string
 	return nil
 }
 
-func (streams *StreamsStorage) setArchiveStreamMinio(streamID uuid.UUID, bucket string, msPerSegment int64) error {
+func (streams *StreamsStorage) setArchiveStreamMinio(streamID uuid.UUID, dir string, bucket string, msPerSegment int64) error {
 	if msPerSegment == 0 {
 		return fmt.Errorf("bad ms per segment archive stream")
 	}
@@ -234,6 +234,7 @@ func (streams *StreamsStorage) setArchiveStreamMinio(streamID uuid.UUID, bucket 
 
 	newArhive := streamArhive{
 		typeArchive:  "minio",
+		dir:          dir,
 		bucket:       bucket,
 		msPerSegment: msPerSegment,
 	}

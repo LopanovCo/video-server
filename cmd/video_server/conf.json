@@ -39,38 +39,29 @@
     },
     "rtsp_streams": [
         {
-            "guid": "a1b8e7cb-09e6-4f3a-b857-30c7b272a744",
-            "type": "rtsp",
-            "url": "rtsp://rtspstream:2d2f8eeea8abe492a501e7158363b036@zephyr.rtsp.stream/pattern",
-            "output_types": ["mse","hls"],
-            "archive": {
-                "enabled": false
-            },
-            "verbose": "v"
-        },
-        {
             "guid": "0742091c-19cd-4658-9b4f-5320da160f45",
             "type": "rtsp",
             "url": "rtsp://rtspstream:2d2f8eeea8abe492a501e7158363b036@zephyr.rtsp.stream/pattern",
-            "output_types": ["mse","hls"],
+            "output_types": ["mse"],
             "verbose": "v",
             "archive": {
                 "enabled": true,
                 "directory": "G:\\Go\\src\\video-server\\cmd\\video_server\\mp4",
                 "ms_per_file": 10000,
-                "type": "fylesystem"
+                "type": "filesystem"
             }
         },
         {
             "guid": "566bfe72-1f85-4e7d-9c0a-424e6c3b29f3",
             "type": "rtsp",
             "url": "rtsp://rtspstream:2d2f8eeea8abe492a501e7158363b036@zephyr.rtsp.stream/pattern",
-            "output_types": ["mse","hls"],
+            "output_types": ["mse"],
             "verbose": "v",
             "archive": {
                 "enabled": true,
                 "ms_per_file": 15000,
                 "type": "minio",
+                "directory": "G:\\Go\\src\\video-server\\cmd\\video_server\\mp4",
                 "minio_bucket": "vod-bucket"
             }
         }
