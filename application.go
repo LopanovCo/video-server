@@ -1,6 +1,8 @@
 package videoserver
 
 import (
+	"strings"
+
 	"github.com/LdDl/video-server/configuration"
 	"github.com/gin-contrib/cors"
 	"github.com/pkg/errors"
@@ -75,12 +77,7 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 	if cfg.CorsConfig.Enabled {
 		tmp.setCors(cfg.CorsConfig)
 	}
-	// mino
-	err := tmp.Streams.initMinio(cfg.ArchiveCfg.Minio)
-	if err != nil {
-		log.Error().Err(err).Str("scope", "minio").Str("minio", cfg.ArchiveCfg.Minio.String()).Msg("Not init minio")
-		return nil, err
-	}
+	minioEnabled := false
 
 	for _, rtspStream := range cfg.RTSPStreams {
 		validUUID, err := uuid.Parse(rtspStream.GUID)
@@ -103,6 +100,14 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 		tmp.Streams.Streams[validUUID] = NewStreamConfiguration(rtspStream.URL, outputTypes)
 		tmp.Streams.Streams[validUUID].verboseLevel = NewVerboseLevelFrom(rtspStream.Verbose)
 		if rtspStream.Archive.Enabled {
+			if !minioEnabled && strings.ToLower(rtspStream.Archive.TypeArchive) == "minio" {
+				err := tmp.Streams.initMinio(cfg.ArchiveCfg.Minio)
+				if err != nil {
+					log.Error().Err(err).Str("scope", "minio").Str("minio", cfg.ArchiveCfg.Minio.String()).Msg("Not init minio")
+					return nil, err
+				}
+				minioEnabled = true
+			}
 			tmp.SetStreamArchive(validUUID, rtspStream.Archive)
 		}
 	}
