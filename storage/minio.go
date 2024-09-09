@@ -104,25 +104,26 @@ func (m *MinioProvider) UploadFile(ctx context.Context, object ArchiveUnit) (str
 	fname := fmt.Sprintf("%s/%s", m.Path, object.SegmentName)
 
 	buf := &bytes.Buffer{}
+
 	size, err := io.Copy(buf, object.Payload)
 	if err != nil {
 		return "", err
 	}
-
 	bucket := m.DefaultBucket
 	if object.Bucket != "" {
 		bucket = object.Bucket
 	}
-	_, err = m.client.PutObject(
+	nn, err := m.client.PutObject(
 		ctx,
 		bucket,
 		fname,
-		object.Payload,
+		buf,
 		size,
 		minio.PutObjectOptions{
 			ContentType: "application/octet-stream",
 		},
 	)
+	fmt.Println("minio bucket data written", nn.Size)
 	return object.SegmentName, err
 }
 

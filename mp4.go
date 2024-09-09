@@ -3,6 +3,7 @@ package videoserver
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -123,6 +124,11 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 		}
 
 		if archive.typeArchive == "minio" {
+			_, err = outFile.Seek(0, io.SeekStart)
+			if err != nil {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't seek to the start of file")
+				return err
+			}
 			obj := storage.ArchiveUnit{
 				Payload:     outFile,
 				SegmentName: segmentName,
@@ -134,10 +140,10 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 				return err
 			}
 			if segmentName != outSegmentName {
-				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't save segment")
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't validate segment")
 			}
-			fmt.Println("written")
 		}
+
 		if err := outFile.Close(); err != nil {
 			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_close").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't close file")
 			// @todo: handle?
