@@ -3,11 +3,12 @@ package videoserver
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
 
-	"github.com/LdDl/video-server/minio"
+	"github.com/LdDl/video-server/storage"
 	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/format/mp4"
 	"github.com/google/uuid"
@@ -20,6 +21,10 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 	archive := app.getStreamArchive(streamID)
 	if archive == nil {
 		return errors.Wrap(err, "Bad archive stream")
+	}
+	err = archive.store.MakeBucket(archive.bucket)
+	if err != nil {
+		return errors.Wrap(err, "Can't prepare bucket")
 	}
 
 	err = ensureDir(archive.dir)
@@ -121,6 +126,28 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_write_trail").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't write trailing data for TS muxer")
 			// @todo: handle?
 		}
+
+		if archive.typeArchive == storage.STORAGE_MINIO {
+			_, err = outFile.Seek(0, io.SeekStart)
+			if err != nil {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't seek to the start of file")
+				return err
+			}
+			obj := storage.ArchiveUnit{
+				Payload:     outFile,
+				SegmentName: segmentName,
+				Bucket:      archive.bucket,
+			}
+			outSegmentName, err := archive.store.UploadFile(context.Background(), obj)
+			if err != nil {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't save segment")
+				return err
+			}
+			if segmentName != outSegmentName {
+				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't validate segment")
+			}
+		}
+
 		if err := outFile.Close(); err != nil {
 			log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_close").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't close file")
 			// @todo: handle?
@@ -128,36 +155,6 @@ func (app *Application) startMP4(streamID uuid.UUID, ch chan av.Packet, stopCast
 
 		lastSegmentTime = lastSegmentTime.Add(time.Since(st))
 		log.Info().Str("scope", "archive").Str("event", "archive_close_file").Str("stream_id", streamID.String()).Str("segment_path", segmentPath).Msg("Close segment")
-
-		if archive.typeArchive == "minio" {
-			bytes, err := os.ReadFile(segmentPath)
-			if err != nil {
-				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't read segment")
-				return err
-			}
-			obj := minio.ImageUnit{
-				Payload:     bytes,
-				SegmentName: segmentName,
-				Bucket:      archive.bucket,
-			}
-
-			outSegmentName, err := app.Streams.minioStorage.UploadFile(context.Background(), obj)
-			if err != nil {
-				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't save segment")
-				return err
-			}
-
-			if segmentName != outSegmentName {
-				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("out_filename", outFile.Name()).Msg("Can't save segment")
-			}
-
-			err = os.Remove(segmentPath)
-			if err != nil {
-				log.Error().Err(err).Str("scope", "mp4").Str("event", "mp4_save_minio").Str("stream_id", streamID.String()).Str("segment_name", segmentName).Msg("Can't remove segment")
-				return err
-			}
-		}
-
 	}
 	return nil
 }

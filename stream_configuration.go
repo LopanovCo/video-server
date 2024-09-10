@@ -1,6 +1,7 @@
 package videoserver
 
 import (
+	"github.com/LdDl/video-server/storage"
 	"github.com/deepch/vdk/av"
 	"github.com/google/uuid"
 )
@@ -17,10 +18,13 @@ type StreamConfiguration struct {
 	verboseLevel         VerboseLevel
 	archive              *streamArhive
 }
+
 type streamArhive struct {
-	typeArchive  string
+	store        storage.ArchiveStorage
+	typeArchive  storage.StorageType
 	dir          string
 	bucket       string
+	bucketPath   string
 	msPerSegment int64
 }
 
