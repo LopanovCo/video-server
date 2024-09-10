@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/LdDl/video-server/storage"
 	"github.com/deepch/vdk/av"
 	"github.com/deepch/vdk/codec/aacparser"
 	"github.com/deepch/vdk/codec/h264parser"
@@ -183,31 +182,6 @@ func (streams *StreamsStorage) setArchiveStream(streamID uuid.UUID, archiveStora
 		return ErrStreamNotFound
 	}
 	stream.archive = archiveStorage
-	return nil
-}
-
-func (streams *StreamsStorage) setArchiveStreamFS(streamID uuid.UUID, dir string, msPerSegment int64) error {
-	if dir == "" {
-		return fmt.Errorf("bad directory archive stream")
-	}
-	if msPerSegment == 0 {
-		return fmt.Errorf("bad ms per segment archive stream")
-	}
-	newArhive := streamArhive{
-		typeArchive:  storage.STORAGE_FILESYSTEM,
-		dir:          dir,
-		msPerSegment: msPerSegment,
-	}
-	streams.Lock()
-	defer streams.Unlock()
-	stream, ok := streams.Streams[streamID]
-	if !ok {
-		return ErrStreamNotFound
-	}
-	stream.archive = &newArhive
-	if stream.verboseLevel > VERBOSE_NONE {
-		log.Info().Str("scope", SCOPE_STREAM).Str("event", "set_archive").Str("stream_id", streamID.String()).Str("dir", dir).Int64("ms_per_segment", msPerSegment).Msg("Add fylesystem archive")
-	}
 	return nil
 }
 
