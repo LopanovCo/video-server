@@ -29,11 +29,3 @@ func (storage *FileSystemProvider) MakeBucket(bucket string) error {
 func (storage *FileSystemProvider) UploadFile(ctx context.Context, object ArchiveUnit) (string, error) {
 	return "", ErrNotImplementedYet
 }
-
-func (storage *FileSystemProvider) DownloadFile(ctx context.Context, object ArchiveUnit) ([]byte, error) {
-	return nil, ErrNotImplementedYet
-}
-
-func (storage *FileSystemProvider) RemoveFile(ctx context.Context, object ArchiveUnit) (string, error) {
-	return "", ErrNotImplementedYet
-}
