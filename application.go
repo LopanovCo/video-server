@@ -116,7 +116,6 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 				}
 				archiveStorage = streamArhive{
 					store:        fsStorage,
-					typeArchive:  storage.STORAGE_FILESYSTEM,
 					dir:          rtspStream.Archive.Directory,
 					bucket:       rtspStream.Archive.Directory,
 					bucketPath:   rtspStream.Archive.Directory,
@@ -140,7 +139,6 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 				}
 				archiveStorage = streamArhive{
 					store:        minioStorage,
-					typeArchive:  storage.STORAGE_MINIO,
 					dir:          rtspStream.Archive.Directory,
 					bucket:       rtspStream.Archive.MinioBucket,
 					bucketPath:   rtspStream.Archive.MinioPath,
