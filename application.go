@@ -102,7 +102,7 @@ func NewApplication(cfg *configuration.Configuration) (*Application, error) {
 
 		tmp.Streams.Streams[validUUID] = NewStreamConfiguration(rtspStream.URL, outputTypes)
 		tmp.Streams.Streams[validUUID].verboseLevel = NewVerboseLevelFrom(rtspStream.Verbose)
-		if rtspStream.Archive.Enabled {
+		if rtspStream.Archive.Enabled && cfg.ArchiveCfg.Enabled {
 			if rtspStream.Archive.MsPerSegment == 0 {
 				return nil, fmt.Errorf("bad ms per segment archive stream")
 			}

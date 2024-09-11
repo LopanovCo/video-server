@@ -46,6 +46,7 @@ type HLSConfiguration struct {
 
 // ArchiveConfiguration is a archive configuration for every stream with enabled archive option
 type ArchiveConfiguration struct {
+	Enabled      bool          `json:"enabled"`
 	MsPerSegment int64         `json:"ms_per_file"`
 	Directory    string        `json:"directory"`
 	Minio        MinioSettings `json:"minio_settings"`
