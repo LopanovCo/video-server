@@ -22,9 +22,9 @@
         "ms_per_file": 30000,
         "minio_settings": {
             "host": "localhost",
-            "port": 9000,
-            "user": "dev_root",
-            "password": "dev_pass",
+            "port": 29199,
+            "user": "minio_secret_login",
+            "password": "minio_secret_password",
             "default_bucket": "archive-bucket",
             "default_path": "/var/archive_data"
         }
