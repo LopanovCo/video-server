@@ -42,7 +42,7 @@
         {
             "guid": "0742091c-19cd-4658-9b4f-5320da160f45",
             "type": "rtsp",
-            "url": "rtsp://rtspstream:2d2f8eeea8abe492a501e7158363b036@zephyr.rtsp.stream/pattern",
+            "url": "rtsp://localhost:45666/live",
             "output_types": ["mse"],
             "verbose": "v",
             "archive": {
@@ -55,7 +55,7 @@
         {
             "guid": "566bfe72-1f85-4e7d-9c0a-424e6c3b29f3",
             "type": "rtsp",
-            "url": "rtsp://rtspstream:2d2f8eeea8abe492a501e7158363b036@zephyr.rtsp.stream/pattern",
+            "url": "rtsp://localhost:45664/live",
             "output_types": ["mse"],
             "verbose": "v",
             "archive": {
