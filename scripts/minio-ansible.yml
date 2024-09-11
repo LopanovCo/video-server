@@ -1,5 +1,5 @@
 
-# ansible-playbook minio.yml --ask-become-pass -i hosts
+# ansible-playbook minio-ansible.yml --ask-become-pass -i hosts
 
 - hosts: localhost
   gather_facts: no
