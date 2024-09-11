@@ -13,13 +13,13 @@
     },
     "hls": {
         "ms_per_segment": 10000,
-        "directory": "G:\\Go\\src\\video-server\\cmd\\video_server\\hls",
+        "directory": "./hls",
         "window_size": 5,
         "window_capacity" : 10
     },
     "archive": {
         "enabled": true,
-        "directory": "G:\\Go\\src\\video-server\\cmd\\video_server\\mp4",
+        "directory": "./mp4",
         "ms_per_file": 30000,
         "minio_settings": {
             "host": "localhost",
